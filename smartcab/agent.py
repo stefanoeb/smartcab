@@ -24,6 +24,10 @@ class LearningAgent(Agent):
         ###########
         # Set any additional class parameters as needed
 
+        # Number of trials & last state
+        self.trial_num = 0
+        self.previous_state = None
+
 
     def reset(self, destination=None, testing=False):
         """ The reset function is called at the beginning of each trial.
@@ -39,6 +43,19 @@ class LearningAgent(Agent):
         # Update epsilon using a decay function of your choice
         # Update additional class parameters as needed
         # If 'testing' is True, set epsilon and alpha to 0
+
+        if testing:
+            self.epsilon = 0
+            self.alpha = 0
+        else:
+            if self.epsilon > 0:
+                self.epsilon = self.epsilon - 0.05
+            #self.epsilon = math.exp(-0.02 * self.trial_num)
+            # increment trial_num
+            self.trial_num = self.trial_num + 1
+
+            # if self.alpha > 0.2:
+            #    self.alpha = self.alpha - 0.02
 
         return None
 
@@ -59,7 +76,7 @@ class LearningAgent(Agent):
 
         # Set 'state' as a tuple of relevant data for the agent
         state = (waypoint, inputs['light'], inputs['oncoming'], inputs['right'], inputs['left'])
-
+        self.previous_state = state
         return state
 
 
@@ -73,6 +90,9 @@ class LearningAgent(Agent):
         # Calculate the maximum Q-value of all actions for a given state
 
         maxQ = None
+        for key in self.Q[state]:
+            if maxQ == None or maxQ < self.Q[state][key]:
+                maxQ = self.Q[state][key]
 
         return maxQ
 
@@ -86,7 +106,9 @@ class LearningAgent(Agent):
         # When learning, check if the 'state' is not in the Q-table
         # If it is not, create a new dictionary for that state
         #   Then, for each action available, set the initial Q-value to 0.0
-
+        if self.learning:
+            if not (state in self.Q.keys()):
+                self.Q[state] = {None: 0.0, 'forward': 0.0, 'left': 0.0 , 'right': 0.0}
         return
 
 
@@ -97,7 +119,6 @@ class LearningAgent(Agent):
         # Set the agent state and default action
         self.state = state
         self.next_waypoint = self.planner.next_waypoint()
-        action = random.choice(self.valid_actions)
 
         ###########
         ## TO DO ##
@@ -106,6 +127,16 @@ class LearningAgent(Agent):
         # When learning, choose a random action with 'epsilon' probability
         # Otherwise, choose an action with the highest Q-value for the current state
         # Be sure that when choosing an action with highest Q-value that you randomly select between actions that "tie".
+        random_number = random.random()
+        if self.learning:
+            if random_number < self.epsilon:
+                action = random.choice(self.valid_actions)
+            else:
+                maximumQ = self.get_maxQ(state)
+                argmax_actions =  [i for i,j in self.Q[state].items() if j == maximumQ] #get all keys with the highest value
+                action = random.choice(argmax_actions)
+        else:
+            action = random.choice(self.valid_actions)
         return action
 
 
@@ -119,6 +150,9 @@ class LearningAgent(Agent):
         ###########
         # When learning, implement the value iteration update rule
         #   Use only the learning rate 'alpha' (do not use the discount factor 'gamma')
+        if self.learning:
+            #if self.steps_counter > 0:
+            self.Q[self.state][action] =(1.0-self.alpha)*self.Q[self.state][action] +  (self.alpha)*(reward)
 
         return
 
