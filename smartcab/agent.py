@@ -25,7 +25,7 @@ class LearningAgent(Agent):
         # Set any additional class parameters as needed
 
         # Number of trials & last state
-        self.trial_num = 0
+        self.trial_num = 1
         self.previous_state = None
 
 
@@ -48,9 +48,11 @@ class LearningAgent(Agent):
             self.epsilon = 0
             self.alpha = 0
         else:
+            # Linear decaying function
             if self.epsilon > 0:
-                self.epsilon = self.epsilon - 0.05
-            #self.epsilon = math.exp(-0.02 * self.trial_num)
+                self.epsilon = self.epsilon - 0.005
+            # self.epsilon = math.exp(-0.02*self.trial_num)
+
             # increment trial_num
             self.trial_num = self.trial_num + 1
 
@@ -204,14 +206,14 @@ def run():
     #   display      - set to False to disable the GUI if PyGame is enabled
     #   log_metrics  - set to True to log trial and simulation results to /logs
     #   optimized    - set to True to change the default log file name
-    sim = Simulator(env, update_delay=0.01, display=False, log_metrics=True)
+    sim = Simulator(env, update_delay=0.01, display=False, log_metrics=True, optimized=True)
 
     ##############
     # Run the simulator
     # Flags:
     #   tolerance  - epsilon tolerance before beginning testing, default is 0.05
     #   n_test     - discrete number of testing trials to perform, default is 0
-    sim.run(n_test=10)
+    sim.run(n_test=10, tolerance=0.015)
 
 
 if __name__ == '__main__':
