@@ -8,7 +8,7 @@ class LearningAgent(Agent):
     """ An agent that learns to drive in the Smartcab world.
         This is the object you will be modifying. """
 
-    def __init__(self, env, learning=True, epsilon=1.0, alpha=0.5):
+    def __init__(self, env, learning=True, epsilon=1.0, alpha=0.8):
         super(LearningAgent, self).__init__(env)     # Set the agent in the evironment
         self.planner = RoutePlanner(self.env, self)  # Create a route planner
         self.valid_actions = self.env.valid_actions  # The set of valid actions
@@ -50,7 +50,7 @@ class LearningAgent(Agent):
         else:
             # Linear decaying function
             if self.epsilon > 0:
-                self.epsilon = self.epsilon - 0.005
+                self.epsilon = self.epsilon - 0.0025
             # self.epsilon = math.exp(-0.02*self.trial_num)
 
             # increment trial_num
@@ -77,7 +77,7 @@ class LearningAgent(Agent):
         # With the hand-engineered features, this learning process gets entirely negated.
 
         # Set 'state' as a tuple of relevant data for the agent
-        state = (waypoint, inputs['light'], inputs['oncoming'], inputs['right'], inputs['left'])
+        state = (waypoint, inputs['light'], inputs['right'], inputs['left'])
         self.previous_state = state
         return state
 
