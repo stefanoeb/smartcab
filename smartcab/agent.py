@@ -8,7 +8,7 @@ class LearningAgent(Agent):
     """ An agent that learns to drive in the Smartcab world.
         This is the object you will be modifying. """
 
-    def __init__(self, env, learning=True, epsilon=1.0, alpha=0.8):
+    def __init__(self, env, learning=True, epsilon=1.0, alpha=1.0):
         super(LearningAgent, self).__init__(env)     # Set the agent in the evironment
         self.planner = RoutePlanner(self.env, self)  # Create a route planner
         self.valid_actions = self.env.valid_actions  # The set of valid actions
@@ -48,16 +48,14 @@ class LearningAgent(Agent):
             self.epsilon = 0
             self.alpha = 0
         else:
-            # Linear decaying function
-            if self.epsilon > 0:
-                self.epsilon = self.epsilon - 0.0025
-            # self.epsilon = math.exp(-0.02*self.trial_num)
-
-            # increment trial_num
             self.trial_num = self.trial_num + 1
-
-            # if self.alpha > 0.2:
-            #    self.alpha = self.alpha - 0.02
+            if self.epsilon > 0:
+                # self.epsilon = math.exp(-self.alpha*self.trial_num)
+                self.epsilon = self.epsilon - 0.0025
+                self.alpha = self.alpha - 0.0025
+                # self.epsilon = math.exp(-0.02*self.trial_num)
+                # self.epsilon = math.exp(-1 * self.alpha)
+                # self.epsilon = self.alpha ** self.trial_num
 
         return None
 
@@ -77,7 +75,7 @@ class LearningAgent(Agent):
         # With the hand-engineered features, this learning process gets entirely negated.
 
         # Set 'state' as a tuple of relevant data for the agent
-        state = (waypoint, inputs['light'], inputs['right'], inputs['left'])
+        state = (waypoint, inputs['light'], inputs['right'], inputs['left'], inputs['oncoming'])
         self.previous_state = state
         return state
 
@@ -191,7 +189,7 @@ def run():
     #   learning   - set to True to force the driving agent to use Q-learning
     #    * epsilon - continuous value for the exploration factor, default is 1
     #    * alpha   - continuous value for the learning rate, default is 0.5
-    agent = env.create_agent(LearningAgent)
+    agent = env.create_agent(LearningAgent, learning=True)
 
     ##############
     # Follow the driving agent
